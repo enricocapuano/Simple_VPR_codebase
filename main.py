@@ -8,9 +8,6 @@ from pytorch_metric_learning import miners, losses
 from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
-from pytorch_metric_learning.distances import CosineSimilarity
-from pytorch_metric_learning.reducers import ThresholdReducer
-from pytorch_metric_learning.regularizers import LpRegularizer
 import logging
 from os.path import join
 
@@ -33,9 +30,7 @@ class LightningModel(pl.LightningModule):
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
         # Set the loss function
-        self.loss_fn = losses.TripletMarginLoss(distance = CosineSimilarity(), 
-                                    reducer = ThresholdReducer(high=0.3), 
-                                    embedding_regularizer = LpRegularizer())
+        self.loss_fn = losses.MultiSimilarityLoss(alpha=0.5, beta=0.5, base=0.5)
 
     def forward(self, images):
         descriptors = self.model(images)
@@ -46,8 +41,8 @@ class LightningModel(pl.LightningModule):
         return optimizers
 
     #  The loss function call (this method will be called at each training iteration)
-    def loss_function(self, descriptors, labels, hard_pairs):
-        loss = self.loss_fn(descriptors, labels, hard_pairs)
+    def loss_function(self, descriptors, labels, triplets):
+        loss = self.loss_fn(descriptors, labels, triplets)
         return loss
 
     # This is the training step that's executed at each iteration
@@ -59,8 +54,8 @@ class LightningModel(pl.LightningModule):
 
         # Feed forward the batch to the model
         descriptors = self(images)  # Here we are calling the method forward that we defined above
-        hard_pairs = self.miner(descriptors, labels)
-        loss = self.loss_function(descriptors, labels, hard_pairs)  # Call the loss_function we defined above
+        triplets = self.miner(descriptors, labels)
+        loss = self.loss_function(descriptors, labels, triplets)  # Call the loss_function we defined above
         
         self.log('loss', loss.item(), logger=True)
         return {'loss': loss}
