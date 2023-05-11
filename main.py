@@ -4,7 +4,7 @@ import numpy as np
 import torchvision.models
 import pytorch_lightning as pl
 from torchvision import transforms as tfm
-from pytorch_metric_learning import losses
+from pytorch_metric_learning import miners, losses
 from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
@@ -24,12 +24,15 @@ class LightningModel(pl.LightningModule):
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
+        self.miner = miners.MultiSimilarityMiner()
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
         # Set the loss function
-        self.loss_fn = losses.ContrastiveLoss(pos_margin=0, neg_margin=1)
+        self.loss_fn = SelfSupervisedLoss(losses.TripletMarginLoss(distance = CosineSimilarity(), 
+                                    reducer = ThresholdReducer(high=0.3), 
+                                    embedding_regularizer = LpRegularizer()))
 
     def forward(self, images):
         descriptors = self.model(images)
@@ -53,7 +56,8 @@ class LightningModel(pl.LightningModule):
 
         # Feed forward the batch to the model
         descriptors = self(images)  # Here we are calling the method forward that we defined above
-        loss = self.loss_function(descriptors, labels)  # Call the loss_function we defined above
+        hard_pairs = self.miner(embeddings, labels)
+        loss = self.loss_function(descriptors, labels, hard_pairs)  # Call the loss_function we defined above
         
         self.log('loss', loss.item(), logger=True)
         return {'loss': loss}
