@@ -9,6 +9,9 @@ from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 from pytorch_metric_learning.losses import SelfSupervisedLoss
+from pytorch_metric_learning.distances import CosineSimilarity
+from pytorch_metric_learning.reducers import ThresholdReducer
+from pytorch_metric_learning.regularizers import LpRegularizer
 import logging
 from os.path import join
 
