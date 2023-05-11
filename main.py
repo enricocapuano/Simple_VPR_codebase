@@ -8,7 +8,6 @@ from pytorch_metric_learning import miners, losses
 from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
-from pytorch_metric_learning.losses import SelfSupervisedLoss
 from pytorch_metric_learning.distances import CosineSimilarity
 from pytorch_metric_learning.reducers import ThresholdReducer
 from pytorch_metric_learning.regularizers import LpRegularizer
@@ -34,7 +33,9 @@ class LightningModel(pl.LightningModule):
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
         # Set the loss function
-        self.loss_fn = SelfSupervisedLoss(losses.TripletMarginLoss())
+        self.loss_fn = losses.TripletMarginLoss(distance = CosineSimilarity(), 
+                                    reducer = ThresholdReducer(high=0.3), 
+                                    embedding_regularizer = LpRegularizer())
 
     def forward(self, images):
         descriptors = self.model(images)
