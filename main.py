@@ -8,6 +8,7 @@ from pytorch_metric_learning import miners, losses
 from torch.utils.data.dataloader import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
+from pytorch_metric_learning.losses import SelfSupervisedLoss
 import logging
 from os.path import join
 
