@@ -120,7 +120,12 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
+    
     model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds)
+    
+    if args.checkpoint_path is not None:
+        model = model.load_from_checkpoint(args.checkpoint_path)
+     
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
     checkpoint_cb = ModelCheckpoint(
@@ -149,6 +154,8 @@ if __name__ == '__main__':
         reload_dataloaders_every_n_epochs=1,  # we reload the dataset to shuffle the order
         log_every_n_steps=20,
     )
+    
+   
     trainer.validate(model=model, dataloaders=val_loader, ckpt_path=args.checkpoint)
     trainer.fit(model=model, ckpt_path=args.checkpoint, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model=model, dataloaders=test_loader, ckpt_path='best')
