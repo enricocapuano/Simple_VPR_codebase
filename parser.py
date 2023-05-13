@@ -42,6 +42,9 @@ def parse_arguments():
     parser.add_argument("--test_path", type=str, default="data/sf_xs/test",
                         help="path to test set (must contain database and queries)")
     
+    #checkpoint resume
+    parser.add_argument("--ckpt_resume", type=str, default=None)
+    
     args = parser.parse_args()
     return args
 
