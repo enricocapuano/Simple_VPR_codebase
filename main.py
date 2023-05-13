@@ -123,8 +123,8 @@ if __name__ == '__main__':
     
     model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds)
     
-    if args.checkpoint_path is not None:
-        model = model.load_from_checkpoint(args.checkpoint_path)
+    if args.ckpt_resume is not None:
+        model = model.load_from_checkpoint(args.ckpt_resume)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
