@@ -120,13 +120,7 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
-    
-    
-    
-    if args.ckpt_resume is not None:
-        model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds).load_from_checkpoint(args.ckpt_resume)
-    else:
-        model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds)
+    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
