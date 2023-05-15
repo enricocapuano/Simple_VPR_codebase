@@ -9,7 +9,13 @@ def parse_arguments():
                         help="exp name")
     parser.add_argument("--checkpoint", type=str, default=None,
                         help="checkpoint path")
-
+    
+    #parameters
+    parser.add_argument("--alpha", type=float, default=0.5, 
+                        help="alpha parameter of multi similarity")
+    parser.add_argument("--base", type=float, default=0.5, 
+                        help="base parameter of multi similarity")
+    
     # Training parameters
     parser.add_argument("--batch_size", type=int, default=64,
                         help="The number of places to use per iteration (one place is N images)")
