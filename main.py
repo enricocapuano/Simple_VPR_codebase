@@ -24,7 +24,7 @@ class LightningModel(pl.LightningModule):
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
-        self.miner = miners.MultiSimilarityMiner()
+        self.miner = miners.MultiSimilarityMiner(epsilone=0.1)
         self.alpha = alpha_param
         self.beta = beta_param
         self.base = base_param
@@ -33,7 +33,7 @@ class LightningModel(pl.LightningModule):
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
         # Set the loss function
-        self.loss_fn = losses.MultiSimilarityLoss(alpha=self.alpha, beta=self.beta, base=self.base)
+        self.loss_fn = losses.MultiSimilarityLoss(alpha=2, beta=50, base=0.5)
 
     def forward(self, images):
         descriptors = self.model(images)
