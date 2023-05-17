@@ -18,7 +18,7 @@ from datasets.train_dataset import TrainDataset
 
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=0.5, base_param=0.5):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=0.5, beta_param=0.5, base_param=0.5):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
@@ -26,7 +26,7 @@ class LightningModel(pl.LightningModule):
         self.save_only_wrong_preds = save_only_wrong_preds
         self.miner = miners.MultiSimilarityMiner()
         self.alpha = alpha_param
-        self.beta = 1 - self.alpha
+        self.beta = beta_param
         self.base = base_param
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
-    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, base_param=args.base)
+    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
