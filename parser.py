@@ -11,11 +11,11 @@ def parse_arguments():
                         help="checkpoint path")
     
     #parameters
-    parser.add_argument("--alpha", type=float, default=None, 
+    parser.add_argument("--alpha", type=float, default=0.8, 
                         help="alpha parameter of multi similarity")
-    parser.add_argument("--beta", type=float, default=None, 
+    parser.add_argument("--beta", type=float, default=0.2, 
                         help="beta parameter of multi similarity")
-    parser.add_argument("--base", type=float, default=None, 
+    parser.add_argument("--base", type=float, default=1.0, 
                         help="base parameter of multi similarity")
     
     # Training parameters
