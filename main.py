@@ -24,7 +24,7 @@ class LightningModel(pl.LightningModule):
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
-        self.miner = miners.MultiSimilarityMiner(epsilone=0.1)
+        self.miner = miners.MultiSimilarityMiner(epsilon=0.1)
         self.alpha = alpha_param
         self.beta = beta_param
         self.base = base_param
