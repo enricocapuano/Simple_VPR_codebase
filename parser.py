@@ -13,6 +13,8 @@ def parse_arguments():
     #parameters
     parser.add_argument("--alpha", type=float, default=0.5, 
                         help="alpha parameter of multi similarity")
+    parser.add_argument("--beta", type=float, default=0.5, 
+                        help="beta parameter of multi similarity")
     parser.add_argument("--base", type=float, default=0.5, 
                         help="base parameter of multi similarity")
     
