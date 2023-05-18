@@ -26,13 +26,14 @@ class GeM(torch.nn.Module):
         return torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(1./self.p)
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd"):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
-        self.miner = miners.MultiSimilarityMiner(epsilon=eps_param)        
+        self.opt_param = opt_param
+        self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())        
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         self.model.avgpool= GeM()
@@ -46,7 +47,12 @@ class LightningModel(pl.LightningModule):
         return descriptors
 
     def configure_optimizers(self):
-        optimizers = torch.optim.SGD(self.parameters(), lr=0.001, weight_decay=0.001, momentum=0.9)
+         if self.opt_param == "sgd":
+            optimizers = torch.optim.SGD(self.parameters(), lr=0.001, weight_decay=0.001, momentum=0.9)
+        elif self.opt_param == "adam":
+            optimizers = torch.optim.Adam(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
+        elif self.opt_param == "adamw":
+            optimizers = torch.optim.AdamW(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.01)
         return optimizers
 
     #  The loss function call (this method will be called at each training iteration)
@@ -129,7 +135,7 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
-    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps)
+    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps, opt_param=args.opt)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
