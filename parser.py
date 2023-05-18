@@ -35,6 +35,8 @@ def parse_arguments():
     # Architecture parameters
     parser.add_argument("--descriptors_dim", type=int, default=512,
                         help="dimensionality of the output descriptors")
+    parser.add_argument("--opt", type=str, default="sgd", 
+                        help="type of optimizer")
     
     # Visualizations parameters
     parser.add_argument("--num_preds_to_save", type=int, default=0,
