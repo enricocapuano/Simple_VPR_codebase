@@ -17,6 +17,8 @@ def parse_arguments():
                         help="beta parameter of multi similarity")
     parser.add_argument("--base", type=float, default=1.0, 
                         help="base parameter of multi similarity")
+     parser.add_argument("--eps", type=float, default=0.1, 
+                        help="eps parameter of multi similarity miner")
     
     # Training parameters
     parser.add_argument("--batch_size", type=int, default=64,
