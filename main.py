@@ -16,24 +16,30 @@ import parser
 from datasets.test_dataset import TestDataset
 from datasets.train_dataset import TrainDataset
 
+class GeM(torch.nn.Module):
+    def __init__(self, p=2.5, eps=1e-6):
+        super(GeM,self).__init__()
+        self.p = torch.nn.Parameter(torch.ones(1)*p)
+        self.eps = eps
+    
+    def forward(self, x):
+        return torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(1./self.p)
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=0.5, beta_param=0.5, base_param=0.5):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=0.8, beta_param=0.2, base_param=1.0, eps_param=0.1):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
-        self.miner = miners.MultiSimilarityMiner(epsilon=0.1)
-        self.alpha = alpha_param
-        self.beta = beta_param
-        self.base = base_param
+        self.miner = miners.MultiSimilarityMiner(epsilon=eps_param)        
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
+        self.model.avgpool= GeM()
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
         # Set the loss function
-        self.loss_fn = losses.MultiSimilarityLoss(alpha=self.alpha, beta=self.beta, base=self.base)
+        self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
 
     def forward(self, images):
         descriptors = self.model(images)
@@ -123,7 +129,7 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
-    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base)
+    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
