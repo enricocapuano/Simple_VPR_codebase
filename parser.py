@@ -37,6 +37,12 @@ def parse_arguments():
                         help="dimensionality of the output descriptors")
     parser.add_argument("--opt", type=str, default="sgd", 
                         help="type of optimizer")
+    parses.add_argument("--loss", type=str, default="cl", 
+                        help="type of loss function")
+    parser.add_argument("--pool", type=str, default=None,
+                        help="type of pooling")
+    parser.add_argument("--miner", type=str, default="ms",
+                        help="type of miner")
     
     # Visualizations parameters
     parser.add_argument("--num_preds_to_save", type=int, default=0,
