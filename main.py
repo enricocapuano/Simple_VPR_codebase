@@ -27,7 +27,7 @@ class GeM(torch.nn.Module):
         return torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(1./self.p)
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, pool_param, miner_param, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl"):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", pool_param="None", miner_param="None"):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
