@@ -27,13 +27,16 @@ class GeM(torch.nn.Module):
         return torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(1./self.p)
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd"):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", pool_param, miner_param="ms"):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
         self.num_preds_to_save = num_preds_to_save
         self.save_only_wrong_preds = save_only_wrong_preds
         self.opt_param = opt_param
+        self.loss_param = loss_param
+        self.pool_param = pool_param
+        self.miner_param = miner_param
         self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())        
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
@@ -140,7 +143,7 @@ if __name__ == '__main__':
     utils.setup_logging(join('logs', 'lightning_logs', args.exp_name), console='info')
 
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
-    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps, opt_param=args.opt)
+    model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps, opt_param=args.opt, loss_param=args.loss, pool_param=args.pool, miner_param=args.miner)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
