@@ -37,7 +37,7 @@ def parse_arguments():
                         help="dimensionality of the output descriptors")
     parser.add_argument("--opt", type=str, default="sgd", 
                         help="type of optimizer")
-    parses.add_argument("--loss", type=str, default="cl", 
+    parser.add_argument("--loss", type=str, default="cl", 
                         help="type of loss function")
     parser.add_argument("--pool", type=str, default=None,
                         help="type of pooling")
