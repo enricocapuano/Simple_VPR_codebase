@@ -55,7 +55,7 @@ class LightningModel(pl.LightningModule):
         # Set the loss function
         if self.loss_param == "cl":
             self.loss_fn = losses.ContrastiveLoss(pos_margin=0, neg_margin=1)
-        elif self.loss_pram == "ms":
+        elif self.loss_param == "ms":
             self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
 
     def forward(self, images):
