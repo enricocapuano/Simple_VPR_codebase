@@ -54,6 +54,10 @@ class LightningModel(pl.LightningModule):
             optimizers = torch.optim.Adam(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
         elif self.opt_param == "adamw":
             optimizers = torch.optim.AdamW(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.01)
+        elif self.opt_param == "adamax":
+            optimizers = torch.optim.Adamax(self.parameters(), lr=0.002, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
+        elif self.opt_param == "amsgrad":
+            optimizers = torch.optim.Adam(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=True)
         return optimizers
 
     #  The loss function call (this method will be called at each training iteration)
