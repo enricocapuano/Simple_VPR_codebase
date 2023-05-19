@@ -27,7 +27,7 @@ class GeM(torch.nn.Module):
         return torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(1./self.p)
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", pool_param, miner_param="ms"):
+    def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", pool_param, miner_param):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
@@ -37,14 +37,26 @@ class LightningModel(pl.LightningModule):
         self.loss_param = loss_param
         self.pool_param = pool_param
         self.miner_param = miner_param
-        self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())        
+        
+        #set the miner
+        if self.miner_param == "ms":
+            self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())   
+            
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
-        self.model.avgpool= GeM()
+        
+        #set the kind of pooling
+        if self.pool_param == "gem":
+            self.model.avgpool= GeM()
+       
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
+        
         # Set the loss function
-        self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
+        if self.loss_param == "cl":
+            self.loss_fn = losses.ContrastiveLoss(pos_margin=0, neg_margin=1)
+        elif self.loss_pram == "ms":
+            self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
 
     def forward(self, images):
         descriptors = self.model(images)
