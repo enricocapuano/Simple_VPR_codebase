@@ -45,13 +45,13 @@ def parse_arguments():
     # Architecture parameters
     parser.add_argument("--descriptors_dim", type=int, default=512,
                         help="dimensionality of the output descriptors")
-    parser.add_argument("--opt", type=str, default="sgd", 
+    parser.add_argument("--opt", type=str, default="adam", 
                         help="type of optimizer")
-    parser.add_argument("--loss", type=str, default="cl", 
+    parser.add_argument("--loss", type=str, default="ms", 
                         help="type of loss function")
-    parser.add_argument("--pool", type=str, default=None,
+    parser.add_argument("--pool", type=str, default="gem",
                         help="type of pooling")
-    parser.add_argument("--miner", type=str, default=None,
+    parser.add_argument("--miner", type=str, default="ms",
                         help="type of miner")
     
     # Visualizations parameters
