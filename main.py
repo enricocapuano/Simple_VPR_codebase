@@ -28,8 +28,8 @@ class GeM(torch.nn.Module):
 
 class LightningModel(pl.LightningModule):
     def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, 
-                 alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", 
-                 pool_param="None", miner_param="None", lr_adam_param=0.0001, loss_marg=0.1, miner_marg=0.2, swap_param=False, smooth_param=False):
+                 alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="adam", loss_param="ms", 
+                 pool_param="gem", miner_param="ms", lr_adam_param=0.0001, loss_marg=0.1, miner_marg=0.2, swap_param=False, smooth_param=False):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
