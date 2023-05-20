@@ -29,7 +29,7 @@ class GeM(torch.nn.Module):
 class LightningModel(pl.LightningModule):
     def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, 
                  alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="sgd", loss_param="cl", 
-                 pool_param="None", miner_param="None", lr_adam_param=0.0001):
+                 pool_param="None", miner_param="None", lr_adam_param=0.0001, loss_marg=0.1, miner_marg=0.2, swap_param=False, smooth_param=False):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
@@ -43,7 +43,9 @@ class LightningModel(pl.LightningModule):
         
         #set the miner
         if self.miner_param == "ms":
-            self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())   
+            self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())
+        elif self.miner_param == "tm":
+            self.miner = miners.TripletMarginMiner(margin=miner_marg, type_of_triplets="all")
             
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
@@ -60,6 +62,8 @@ class LightningModel(pl.LightningModule):
             self.loss_fn = losses.ContrastiveLoss(pos_margin=0, neg_margin=1)
         elif self.loss_param == "ms":
             self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
+        elif self.loss_param == "tm":
+            self.loss_fn = losses.TripletMarginLoss(margin=loss_marg, swap=swap_param, smooth_loss=smooth_param, triplets_per_anchor="all")
 
     def forward(self, images):
         descriptors = self.model(images)
@@ -160,7 +164,8 @@ if __name__ == '__main__':
     train_dataset, val_dataset, test_dataset, train_loader, val_loader, test_loader = get_datasets_and_dataloaders(args)
     model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, 
                            alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps, opt_param=args.opt, 
-                           loss_param=args.loss, pool_param=args.pool, miner_param=args.miner, lr_adam_param=args.lr_adam)
+                           loss_param=args.loss, pool_param=args.pool, miner_param=args.miner, lr_adam_param=args.lr_adam,
+                           miner_marg=args.miner_marg, loss_marg=args.margin, swap_param=args.swap, smooth_param=args.smooth)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
