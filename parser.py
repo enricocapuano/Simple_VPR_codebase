@@ -21,6 +21,14 @@ def parse_arguments():
                         help="eps parameter of multi similarity miner")
     parser.add_argument("--lr_adam", type=float, default=0.0001,
                         help="learning rate adam optimizer")
+    parser.add_argument("--miner_marg", type=float, default=0.2, 
+                        help="margin parameter of triplet margin miner")
+    parser.add_argument("--margin", type=float, default=0.1, 
+                        help="Margin parameter of TripletMarginLoss")
+    parser.add_argument("--swap", type=bool, default=False, 
+                        help="swap parameter of TripletMarginLoss")
+    parser.add_argument("--smooth", type=bool, default=False, 
+                        help="smooth_loss parameter of TripletMarginLoss")
     
     # Training parameters
     parser.add_argument("--batch_size", type=int, default=64,
