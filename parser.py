@@ -19,7 +19,7 @@ def parse_arguments():
                         help="base parameter of multi similarity")
     parser.add_argument("--eps", type=float, default=0.1, 
                         help="eps parameter of multi similarity miner")
-    parser.add_argument("--lr_adam", type=float, default=0.001,
+    parser.add_argument("--lr_adam", type=float, default=0.0001,
                         help="learning rate adam optimizer")
     
     # Training parameters
