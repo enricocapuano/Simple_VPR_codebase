@@ -46,13 +46,17 @@ class LightningModel(pl.LightningModule):
             self.miner = miners.MultiSimilarityMiner(epsilon=eps_param, distance=CosineSimilarity())
         elif self.miner_param == "tm":
             self.miner = miners.TripletMarginMiner(margin=miner_marg, type_of_triplets="all")
+        elif self.miner_param == "bhm":
+            self.miner = miners.BatchHardMiner()
             
         # Use a pretrained model
         self.model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         
         #set the kind of pooling
         if self.pool_param == "gem":
-            self.model.avgpool= GeM()
+            self.model.avgpool = GeM()
+        elif self.pool_param == "gap":
+            self.model.avgpool = torch.nn.AdaptiveAvgPool2d((1,1))
        
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
@@ -64,6 +68,8 @@ class LightningModel(pl.LightningModule):
             self.loss_fn = losses.MultiSimilarityLoss(alpha=alpha_param, beta=beta_param, base=base_param)
         elif self.loss_param == "tm":
             self.loss_fn = losses.TripletMarginLoss(margin=loss_marg, swap=swap_param, smooth_loss=smooth_param, triplets_per_anchor="all")
+        elif self.loss_param == "cil": #good with batch hard miner
+            self.loss_fn = losses.CircleLoss(m=0.4, gamma=80)
 
     def forward(self, images):
         descriptors = self.model(images)
