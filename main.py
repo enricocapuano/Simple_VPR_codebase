@@ -56,7 +56,7 @@ class LightningModel(pl.LightningModule):
         if self.pool_param == "gem":
             self.model.avgpool = GeM()
         elif self.pool_param == "gap":
-            self.model.avgpool = torch.nn.AdaptiveAvgPool2d((1,1))
+            self.model.avgpool = torch.nn.AdaptiveAvgPool2d((1,1)) #global avg pooling
        
         # Change the output of the FC layer to the desired descriptors dimension
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, descriptors_dim)
