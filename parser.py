@@ -51,7 +51,7 @@ def parse_arguments():
                         help="type of loss function")
     parser.add_argument("--pool", type=str, default="gem",
                         help="type of pooling")
-    parser.add_argument("--miner", type=str, default="ms",
+    parser.add_argument("--miner", type=str, default=None,
                         help="type of miner")
     
     # Visualizations parameters
