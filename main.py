@@ -90,7 +90,10 @@ class LightningModel(pl.LightningModule):
 
     #  The loss function call (this method will be called at each training iteration)
     def loss_function(self, descriptors, labels, triplets):
-        loss = self.loss_fn(descriptors, labels, triplets)
+        if self.miner_param == "no":
+             loss = self.loss_fn(descriptors, labels)
+        else:
+            loss = self.loss_fn(descriptors, labels, triplets)
         return loss
 
     # This is the training step that's executed at each iteration
@@ -102,7 +105,11 @@ class LightningModel(pl.LightningModule):
 
         # Feed forward the batch to the model
         descriptors = self(images)  # Here we are calling the method forward that we defined above
-        triplets = self.miner(descriptors, labels)
+        if self.miner_param == "no":
+            triplets = None
+        else:
+            triplets = self.miner(descriptors, labels)
+            
         loss = self.loss_function(descriptors, labels, triplets)  # Call the loss_function we defined above
         
         self.log('loss', loss.item(), logger=True)
