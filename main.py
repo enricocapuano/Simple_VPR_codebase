@@ -74,7 +74,8 @@ class LightningModel(pl.LightningModule):
     def forward(self, images):
         descriptors = self.model(images)
         return descriptors
-
+        
+    # Set the optimizer algorithm 
     def configure_optimizers(self):
         if self.opt_param == "sgd":
             optimizers = torch.optim.SGD(self.parameters(), lr=0.001, weight_decay=0.001, momentum=0.9)
