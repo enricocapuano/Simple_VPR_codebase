@@ -29,6 +29,8 @@ def parse_arguments():
                         help="swap parameter of TripletMarginLoss")
     parser.add_argument("--smooth", type=bool, default=False, 
                         help="smooth_loss parameter of TripletMarginLoss")
+   parser.add_argument("--p", type=float, default=2.5, 
+                        help="p parameter of GeM pooling")
     
     # Training parameters
     parser.add_argument("--batch_size", type=int, default=64,
