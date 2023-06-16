@@ -29,7 +29,8 @@ class GeM(torch.nn.Module):
 class LightningModel(pl.LightningModule):
     def __init__(self, val_dataset, test_dataset, descriptors_dim=512, num_preds_to_save=0, save_only_wrong_preds=True, 
                  alpha_param=1, beta_param=50, base_param=0.0, eps_param=0.1, opt_param="adam", loss_param="ms", 
-                 pool_param="gem", miner_param="ms", lr_adam_param=0.0001, loss_marg=0.1, miner_marg=0.2, swap_param=False, smooth_param=False, p=2.5):
+                 pool_param="gem", miner_param="ms", lr_adam_param=0.0001, loss_marg=0.1, miner_marg=0.2, swap_param=False, smooth_param=False, 
+                 p_param=2.5, wd_adamw_param=0.01):
         super().__init__()
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
@@ -40,7 +41,13 @@ class LightningModel(pl.LightningModule):
         self.pool_param = pool_param
         self.miner_param = miner_param
         self.lr_adam_param = lr_adam_param
-        self.p=p
+        self.p_param = p_param
+        self.loss_marg = loss_marg
+        self.miner_marg = miner_marg
+        self.swap_param = swap_param
+        self.smooth_param = smooth_param
+        self.wd_adamw_param = wd_adamw_param
+                     
         
         #set the miner
         if self.miner_param == "ms":
@@ -55,7 +62,7 @@ class LightningModel(pl.LightningModule):
         
         #set the kind of pooling
         if self.pool_param == "gem":
-            self.model.avgpool = GeM(p=self.p)
+            self.model.avgpool = GeM(p=self.p_param)
         elif self.pool_param == "gap":
             self.model.avgpool = torch.nn.AdaptiveAvgPool2d((1,1)) #global avg pooling
        
@@ -83,7 +90,7 @@ class LightningModel(pl.LightningModule):
         elif self.opt_param == "adam":
             optimizers = torch.optim.Adam(self.parameters(), lr=self.lr_adam_param, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
         elif self.opt_param == "adamw":
-            optimizers = torch.optim.AdamW(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.01)
+            optimizers = torch.optim.AdamW(self.parameters(), lr=0.0001, betas=(0.9, 0.999), eps=1e-08, weight_decay=self.wd_adamw_param)
         elif self.opt_param == "adamax":
             optimizers = torch.optim.Adamax(self.parameters(), lr=0.002, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
         elif self.opt_param == "amsgrad":
@@ -180,7 +187,8 @@ if __name__ == '__main__':
     model = LightningModel(val_dataset, test_dataset, args.descriptors_dim, args.num_preds_to_save, args.save_only_wrong_preds, 
                            alpha_param=args.alpha, beta_param=args.beta, base_param=args.base, eps_param=args.eps, opt_param=args.opt, 
                            loss_param=args.loss, pool_param=args.pool, miner_param=args.miner, lr_adam_param=args.lr_adam,
-                           miner_marg=args.miner_marg, loss_marg=args.margin, swap_param=args.swap, smooth_param=args.smooth, p=args.p)
+                           miner_marg=args.miner_marg, loss_marg=args.margin, swap_param=args.swap, smooth_param=args.smooth, p_param=args.p,
+                           wd_adamw_param=args.wd_adamw)
      
     
     # Model params saving using Pytorch Lightning. Save the best 3 models according to Recall@1
